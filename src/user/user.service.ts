@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 type UserResponse = {
   id: string;
@@ -9,12 +10,6 @@ type UserResponse = {
   age: number;
 };
 
-interface CreateUserDto {
-  name: string;
-  email: string;
-  password: string;
-  age: number;
-}
 
 @Injectable()
 export class UserService {
@@ -33,8 +28,13 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserResponse> {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
     const user = (await this.prismaService.user.create({
-      data: createUserDto,
+      data: {
+        ...createUserDto,
+        password: hashedPassword,
+      },
       select: {
         id: true,
         name: true,
@@ -42,6 +42,19 @@ export class UserService {
         age: true,
       },
     })) as UserResponse;
+    return user;
+  }
+
+  async getUserById(id: string): Promise<UserResponse | null> {
+    const user = (await this.prismaService.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        age: true,
+      },
+    })) as UserResponse | null;
     return user;
   }
 }
