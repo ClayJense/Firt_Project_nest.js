@@ -10,7 +10,6 @@ type UserResponse = {
   age: number;
 };
 
-
 @Injectable()
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -29,7 +28,10 @@ export class UserService {
 
   async createUser(createUserDto: CreateUserDto): Promise<UserResponse> {
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltRounds,
+    );
     const user = (await this.prismaService.user.create({
       data: {
         ...createUserDto,
