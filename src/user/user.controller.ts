@@ -11,9 +11,9 @@ export class UserController {
     return this.userService.getUsers();
   }
 
-  @Post()
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<any> {
-    return this.userService.createUser(createUserDto);
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto): Promise<any> {
+    return this.userService.register(createUserDto);
   }
 
   @Get(':id')
